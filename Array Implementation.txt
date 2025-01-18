@@ -1,0 +1,102 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// Structure to represent a non-zero element in a sparse matrix
+struct Element {
+    int row, col, value;
+};
+
+class SparseMatrix {
+private:
+    int rows, cols;
+    vector<Element> elements;
+
+public:
+    SparseMatrix(int r, int c) : rows(r), cols(c) {}
+
+    void addElement(int r, int c, int value) {
+        if (value != 0) {
+            elements.push_back({r, c, value});
+        }
+    }
+
+    void display() {
+        cout << "Sparse Matrix Representation (row, col, value):\n";
+        for (const auto& e : elements) {
+            cout << "(" << e.row << ", " << e.col << ", " << e.value << ")\n";
+        }
+    }
+
+    SparseMatrix transpose() {
+        SparseMatrix transposed(cols, rows);
+        for (const auto& e : elements) {
+            transposed.addElement(e.col, e.row, e.value);
+        }
+        return transposed;
+    }
+
+    SparseMatrix add(const SparseMatrix& other) {
+        if (rows != other.rows || cols != other.cols) {
+            throw invalid_argument("Matrices must have the same dimensions for addition.");
+        }
+
+        SparseMatrix result(rows, cols);
+        size_t i = 0, j = 0;
+
+        while (i < elements.size() && j < other.elements.size()) {
+            if (elements[i].row < other.elements[j].row ||
+                (elements[i].row == other.elements[j].row && elements[i].col < other.elements[j].col)) {
+                result.addElement(elements[i].row, elements[i].col, elements[i].value);
+                i++;
+            } else if (elements[i].row > other.elements[j].row ||
+                       (elements[i].row == other.elements[j].row && elements[i].col > other.elements[j].col)) {
+                result.addElement(other.elements[j].row, other.elements[j].col, other.elements[j].value);
+                j++;
+            } else {
+                int sum = elements[i].value + other.elements[j].value;
+                if (sum != 0) {
+                    result.addElement(elements[i].row, elements[i].col, sum);
+                }
+                i++;
+                j++;
+            }
+        }
+
+        while (i < elements.size()) {
+            result.addElement(elements[i].row, elements[i].col, elements[i].value);
+            i++;
+        }
+
+        while (j < other.elements.size()) {
+            result.addElement(other.elements[j].row, other.elements[j].col, other.elements[j].value);
+            j++;
+        }
+
+        return result;
+    }
+};
+
+int main() {
+    SparseMatrix mat1(4, 4);
+    mat1.addElement(0, 1, 5);
+    mat1.addElement(1, 2, 8);
+    mat1.addElement(2, 3, 3);
+    mat1.display();
+
+    SparseMatrix mat2(4, 4);
+    mat2.addElement(0, 1, 6);
+    mat2.addElement(1, 2, 7);
+    mat2.addElement(2, 3, -3);
+    mat2.display();
+
+    SparseMatrix result = mat1.add(mat2);
+    cout << "Addition Result:\n";
+    result.display();
+
+    SparseMatrix transposed = mat1.transpose();
+    cout << "Transposed Matrix:\n";
+    transposed.display();
+
+    return 0;
+}
