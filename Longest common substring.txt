@@ -1,0 +1,56 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+void printTable(const vector<vector<int>>& dp) {
+    cout << "DP Table:" << endl;
+    for (const auto& row : dp) {
+        for (int cell : row) {
+            cout << cell << " ";
+        }
+        cout << endl;
+    }
+}
+
+string longestCommonSubstring(const string& s1, const string& s2) {
+    int m = s1.length();
+    int n = s2.length();
+    
+    vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+    int maxLength = 0;
+    int endPos = 0;  
+    
+    for (int i = 1; i <= m; ++i) {
+        for (int j = 1; j <= n; ++j) {
+            if (s1[i - 1] == s2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+                if (dp[i][j] > maxLength) {
+                    maxLength = dp[i][j];
+                    endPos = i;
+                }
+            } else {
+                dp[i][j] = 0;
+            }
+        }
+    }
+
+    
+    printTable(dp);
+
+    
+    return s1.substr(endPos - maxLength, maxLength);
+}
+
+int main() {
+    string s1 = "ABAB";
+    string s2 = "BABA";
+
+   
+    string result = longestCommonSubstring(s1, s2);
+
+    
+    cout << "Longest Common Substring: " << result << endl;
+
+    return 0;
+}
